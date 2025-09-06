@@ -1,0 +1,30 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout the repo
+      - uses: actions/checkout@v3
+
+      # 2. Setup Node.js
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # 3. Install dependencies
+      - run: npm install
+
+      # 4. Set environment variable from GitHub Secret
+      - name: Set OPENAI API Key
+        run: echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+
+      # 5. Run Playwright tests
+      - name: Run tests
+        run: npx playwright test
