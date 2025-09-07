@@ -1,30 +1,33 @@
-name: Playwright Tests
+name: Self-Healing Automation CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      # 1. Checkout the repo
-      - uses: actions/checkout@v3
+      # Step 1 - Checkout code
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      # 2. Setup Node.js
-      - uses: actions/setup-node@v3
+      # Step 2 - Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: 18
 
-      # 3. Install dependencies
-      - run: npm install
+      # Step 3 - Install dependencies
+      - name: Install dependencies
+        run: npm install
 
-      # 4. Set environment variable from GitHub Secret
-      - name: Set OPENAI API Key
-        run: echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
-
-      # 5. Run Playwright tests
-      - name: Run tests
+      # Step 4 - Run Playwright tests
+      - name: Run Playwright tests
         run: npx playwright test
+
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
