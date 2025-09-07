@@ -1,15 +1,33 @@
-import { test } from '@playwright/test';
-import LoginPage from '../pages/loginPage';
+import { test } from "@playwright/test";
+import { suggestLocator } from "../aiHelper";
 
-test('Simple login demo', async ({ page }) => {
-    const login = new LoginPage();
+test("AI self-healing locator demo", async ({ page }) => {
+  // Load local demo page
+  await page.goto("./pages/login.html");
 
-    await page.goto('file:///path/to/demo_login.html');
+  let locator = "#username"; // Wrong locator on purpose
 
-    await login.enterUsername(page, '#user-name', 'admin');
-    await login.enterPassword(page, '#user-pass', 'admin');
-    await login.clickLogin(page, '#loginBtn');
+  try {
+    await page.fill(locator, "myUser");
+  } catch (error) {
+    console.log(`❌ Failed to locate element with: ${locator}`);
 
-    const message = await login.getMessage(page, '#message');
-    console.log('Login Result:', message);
+    // Capture page HTML
+    const htmlSnippet = await page.content();
+
+    // Ask AI for help
+    const aiLocator = await suggestLocator(locator, htmlSnippet);
+
+    console.log("🤖 AI suggested locator:", aiLocator);
+
+    // Retry with AI suggested locator
+    if (aiLocator) {
+      await page.fill(aiLocator, "myUser");
+      console.log("✅ Successfully filled username with AI suggested locator");
+    }
+  }
+
+  // Fill password normally
+  await page.fill("#password", "myPassword");
+  await page.click("#login-btn");
 });
